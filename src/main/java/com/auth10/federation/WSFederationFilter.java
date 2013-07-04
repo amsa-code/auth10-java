@@ -71,6 +71,7 @@ public class WSFederationFilter implements Filter {
 
         if (!excludedUrl && principal == null) {
             if (!FederatedConfiguration.getInstance().getEnableManualRedirect()) {
+                logger.debug("redirecting to identity provider");
                 this.redirectToIdentityProvider(httpRequest, httpResponse);
             } else {
                 logger.debug("redirecting to login page");
