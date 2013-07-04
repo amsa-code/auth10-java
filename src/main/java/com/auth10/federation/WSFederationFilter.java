@@ -40,6 +40,7 @@ public class WSFederationFilter implements Filter {
             FilterChain chain) throws IOException, ServletException {
 
         logger.debug("filtering");
+
         FederatedPrincipal principal = null;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
