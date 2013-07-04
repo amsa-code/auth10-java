@@ -48,6 +48,7 @@ public class WSFederationFilter implements Filter {
 
         // is the request is a token?
         if (this.isSignInResponse(httpRequest)) {
+            logger.debug("authenticating with token");
             principal = this.authenticateWithToken(httpRequest, httpResponse);
             this.writeSessionToken(httpRequest, principal);
             this.redirectToOriginalUrl(httpRequest, httpResponse);
@@ -55,6 +56,7 @@ public class WSFederationFilter implements Filter {
 
         // is principal in session?
         if (principal == null && this.sessionTokenExists(httpRequest)) {
+            logger.debug("authenticating with session token");
             principal = this.authenticateWithSessionToken(httpRequest,
                     httpResponse);
         }
@@ -71,12 +73,14 @@ public class WSFederationFilter implements Filter {
             if (!FederatedConfiguration.getInstance().getEnableManualRedirect()) {
                 this.redirectToIdentityProvider(httpRequest, httpResponse);
             } else {
+                logger.debug("redirecting to login page");
                 this.redirectToLoginPage(httpRequest, httpResponse);
             }
 
             return;
         }
 
+        logger.debug("principal=" + principal);
         chain.doFilter(new FederatedHttpServletRequest(httpRequest, principal),
                 response);
     }
