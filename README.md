@@ -20,7 +20,7 @@ Add a reference to `com.auth10.federation` library from your project. Edit your 
 	<dependency>
 		<groupId>com.auth10.federation</groupId>
 		<artifactId>auth10-federation</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.9-SNAPSHOT</version>
 	</dependency>
 	...
 </dependencies>
