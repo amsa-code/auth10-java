@@ -9,11 +9,15 @@
 	<packaging>jar</packaging>
 	<description>WS-Federation and SAML tokens library to secure Java-based applications</description>
 
+	<properties>
+		<slf4j.version>1.7.5</slf4j.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -30,9 +34,9 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
+			<version>${slf4j.version}</version>
 		</dependency>
-		
+
 		<!-- xalan present as runtime dependency of opensaml but required for compile -->
 		<dependency>
 			<groupId>xalan</groupId>
@@ -48,7 +52,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.5</version>
+			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
