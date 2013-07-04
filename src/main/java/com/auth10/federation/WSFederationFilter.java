@@ -141,13 +141,22 @@ public class WSFederationFilter implements Filter {
                 .setAttribute(PRINCIPAL_SESSION_VARIABLE, principal);
     }
 
+    // java.lang.IllegalStateException: Cannot create a session after the
+    // response has been committed
+    // org.apache.catalina.connector.Request.doGetSession(Request.java:2881)
+    // org.apache.catalina.connector.Request.getSession(Request.java:2316)
+    // org.apache.catalina.connector.RequestFacade.getSession(RequestFacade.java:898)
+    // org.apache.catalina.connector.RequestFacade.getSession(RequestFacade.java:910)
+    // com.auth10.federation.WSFederationFilter.writeSessionToken(WSFederationFilter.java:140)
+    // com.auth10.federation.WSFederationFilter.doFilter(WSFederationFilter.java:53)
+
     protected FederatedPrincipal authenticateWithToken(
             HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String token = request.getParameter("wresult").toString();
 
         if (token == null) {
-            response.sendError(400,
+            sendError(request, response, 400,
                     "You were supposed to send a wresult parameter with a token");
         }
 
@@ -159,11 +168,22 @@ public class WSFederationFilter implements Filter {
                     response);
             return principal;
         } catch (FederationException e) {
-            response.sendError(500,
-                    "Oops and error occurred validating the token.");
+            logger.error(e.getMessage(), e);
+            sendError(request, response, 500,
+                    "Oops an error occurred validating the token.");
         }
 
         return null;
+    }
+
+    private void sendError(HttpServletRequest request,
+            HttpServletResponse response, int errorNum, String message)
+            throws IOException {
+        // create the session to avoid IllegalStateException: Cannot create
+        // a session after the response has been committed.
+        request.getSession();
+        logger.warn("response " + errorNum + ": " + message);
+        response.sendError(errorNum, message);
     }
 
     @Override
