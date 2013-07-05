@@ -25,12 +25,12 @@ public class WSFederationFilter implements Filter {
     final Logger logger = LoggerFactory.getLogger(WSFederationFilter.class);
 
     public WSFederationFilter() {
-        logger.debug("constructing");
+        logger.info("constructing");
     }
 
     @Override
     public void init(FilterConfig config) throws ServletException {
-        logger.debug("initializing");
+        logger.info("initializing");
         this.loginPage = config.getInitParameter("login-page-url");
         this.excludedUrlsRegex = config.getInitParameter("exclude-urls-regex");
     }
@@ -39,7 +39,7 @@ public class WSFederationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
 
-        logger.debug("filtering");
+        logger.info("filtering");
 
         FederatedPrincipal principal = null;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -48,7 +48,7 @@ public class WSFederationFilter implements Filter {
 
         // is the request is a token?
         if (this.isSignInResponse(httpRequest)) {
-            logger.debug("authenticating with token");
+            logger.info("authenticating with token");
             principal = this.authenticateWithToken(httpRequest, httpResponse);
             this.writeSessionToken(httpRequest, principal);
             this.redirectToOriginalUrl(httpRequest, httpResponse);
@@ -56,7 +56,7 @@ public class WSFederationFilter implements Filter {
 
         // is principal in session?
         if (principal == null && this.sessionTokenExists(httpRequest)) {
-            logger.debug("authenticating with session token");
+            logger.info("authenticating with session token");
             principal = this.authenticateWithSessionToken(httpRequest,
                     httpResponse);
         }
@@ -71,17 +71,17 @@ public class WSFederationFilter implements Filter {
 
         if (!excludedUrl && principal == null) {
             if (!FederatedConfiguration.getInstance().getEnableManualRedirect()) {
-                logger.debug("redirecting to identity provider");
+                logger.info("redirecting to identity provider");
                 this.redirectToIdentityProvider(httpRequest, httpResponse);
             } else {
-                logger.debug("redirecting to login page");
+                logger.info("redirecting to login page");
                 this.redirectToLoginPage(httpRequest, httpResponse);
             }
 
             return;
         }
 
-        logger.debug("principal=" + principal);
+        logger.info("principal=" + principal);
         chain.doFilter(new FederatedHttpServletRequest(httpRequest, principal),
                 response);
     }

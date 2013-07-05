@@ -138,6 +138,8 @@ public class SamlTokenValidator {
 
         boolean valid = validateToken(samlToken);
 
+        logger.info("token=" + samlToken);
+
         if (!valid) {
             throw new FederationException("Invalid signature");
         }
@@ -148,14 +150,14 @@ public class SamlTokenValidator {
             trusted |= validateIssuerUsingSubjectName(samlToken, issuer);
         }
 
-        logger.debug("trusted=" + trusted + " after checking subject name");
+        logger.info("trusted=" + trusted + " after checking subject name");
 
         if (!trusted && (this.thumbprint != null)) {
             trusted = validateIssuerUsingCertificateThumbprint(samlToken,
                     this.thumbprint);
         }
 
-        logger.debug("trusted=" + trusted + " after checking cert thumbprint");
+        logger.info("trusted=" + trusted + " after checking cert thumbprint");
 
         if (!trusted) {
             throw new FederationException(
@@ -186,12 +188,12 @@ public class SamlTokenValidator {
 
         List<Claim> claims = null;
         if (samlToken instanceof org.opensaml.saml1.core.Assertion) {
-            logger.debug("getting claims from saml1");
+            logger.info("getting claims from saml1");
             claims = getClaims((org.opensaml.saml1.core.Assertion) samlToken);
         }
 
         if (samlToken instanceof org.opensaml.saml2.core.Assertion) {
-            logger.debug("getting claims from saml2");
+            logger.info("getting claims from saml2");
             claims = getClaims((org.opensaml.saml2.core.Assertion) samlToken);
         }
 
