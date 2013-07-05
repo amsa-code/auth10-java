@@ -141,15 +141,6 @@ public class WSFederationFilter implements Filter {
                 .setAttribute(PRINCIPAL_SESSION_VARIABLE, principal);
     }
 
-    // java.lang.IllegalStateException: Cannot create a session after the
-    // response has been committed
-    // org.apache.catalina.connector.Request.doGetSession(Request.java:2881)
-    // org.apache.catalina.connector.Request.getSession(Request.java:2316)
-    // org.apache.catalina.connector.RequestFacade.getSession(RequestFacade.java:898)
-    // org.apache.catalina.connector.RequestFacade.getSession(RequestFacade.java:910)
-    // com.auth10.federation.WSFederationFilter.writeSessionToken(WSFederationFilter.java:140)
-    // com.auth10.federation.WSFederationFilter.doFilter(WSFederationFilter.java:53)
-
     protected FederatedPrincipal authenticateWithToken(
             HttpServletRequest request, HttpServletResponse response)
             throws IOException {
