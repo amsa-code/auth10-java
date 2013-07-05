@@ -7,7 +7,7 @@
 	<version>0.9-SNAPSHOT</version>
 	<name>auth10-federation</name>
 	<packaging>jar</packaging>
-	<description>WS-Federation and SAML tokens library to secure Java-based applications</description>
+	<description>WS-Federation and SAML tokens library to secure Java-based applications.</description>
 
 	<properties>
 		<slf4j.version>1.7.5</slf4j.version>
