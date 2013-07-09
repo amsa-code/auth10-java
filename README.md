@@ -45,7 +45,6 @@ JCE for Java 7 can be found here : http://www.oracle.com/technetwork/java/javase
 
 Follow the readme found in the JCE zip.
 
-## Preparing Decryption Keys
 The `auth10-federation` maven dependency requires that the private key used for decryption is a PKCS8 key. 
 
 ### Extracting & Converting a Private Key from a JKS Keystore
