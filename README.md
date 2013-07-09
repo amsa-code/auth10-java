@@ -2,34 +2,26 @@ This library speaks the WS-Federation protocol and SAML 1.1 and 2.0 tokens. It i
 
 The code is a fork of https://github.com/auth10-java/auth10-java.git but has been modified to also decrypt `EncryptedAssertion`. The original auth10-java github project is a simplified version with some improvements of the library released by Microsoft <https://github.com/WindowsAzure/azure-sdk-for-java-samples>. 
 
-## Usage
+## Build Instructions
 
 Clone it
 
-	git clone https://github.com/amsa-code/auth10-java.git
+    git clone https://github.com/amsa-code/auth10-java.git
 
 Or download it as zip from <https://github.com/amsa-code/auth10-java/zipball/master>
 
-Import the Maven that was just downloaded in your project (File -> Import -> Existing Maven Projects)
+Build it
 
-Add a reference to `com.auth10.federation` library from your project. Edit your project Maven file `pom.xml` and add this:
+    mvn clean install
 
-```xml
-<dependencies>
-	...
-	<dependency>
-		<groupId>com.auth10.federation</groupId>
-		<artifactId>auth10-federation</artifactId>
-		<version>0.9-SNAPSHOT</version>
-	</dependency>
-	...
-</dependencies>
-```
+
 
 ## Using the Sample Project
 Included in this repo is a sample webapp called 'wsf-sample'. To use this webapp you will need to customize the following files:
 * `/src/main/resources/federation.properties`
 * `/src/main/resources/rsa_private_key.pk8` (only required if using SAML2 encrypted assertions)
+
+Deploy the war to your SSL enabled container and visit the root URL for the webapp.
 
 ## How it works
 The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after the base url of the webapp (/wsf-sample/*) will apply `WSFederationFilter.java` filter. This filter checks if the session is valid and if it's not valid it will redirect to the Identity Provider's authentication url. Once authenticated it returns back to the specified return url in `federation.properties`. The response that comes back will contain the claims under the **Assertion** element node in the SAML xml. If using SAML2 **and encryption** you'll find the claims under the **EncryptedAssertion**. This of course leads onto the next topic....
