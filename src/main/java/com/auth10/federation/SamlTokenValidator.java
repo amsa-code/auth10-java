@@ -159,7 +159,7 @@ public class SamlTokenValidator {
 
 		boolean valid = validateToken(samlToken);
 
-		logger.info("token=" + samlToken);
+		logger.debug("token=" + samlToken);
 
 		if (!valid) {
 			throw new FederationException("Invalid signature");
@@ -171,14 +171,14 @@ public class SamlTokenValidator {
 			trusted |= validateIssuerUsingSubjectName(samlToken, issuer);
 		}
 
-		logger.info("trusted=" + trusted + " after checking subject name");
+		logger.debug("trusted=" + trusted + " after checking subject name");
 
 		if (!trusted && (this.thumbprint != null)) {
 			trusted = validateIssuerUsingCertificateThumbprint(samlToken,
 					this.thumbprint);
 		}
 
-		logger.info("trusted=" + trusted + " after checking cert thumbprint");
+		logger.debug("trusted=" + trusted + " after checking cert thumbprint");
 
 		if (!trusted) {
 			throw new FederationException(
@@ -209,12 +209,12 @@ public class SamlTokenValidator {
 
 		List<Claim> claims = null;
 		if (samlToken instanceof org.opensaml.saml1.core.Assertion) {
-			logger.info("getting claims from saml1");
+			logger.debug("getting claims from saml1");
 			claims = getClaims((org.opensaml.saml1.core.Assertion) samlToken);
 		}
 
 		if (samlToken instanceof org.opensaml.saml2.core.Assertion) {
-			logger.info("getting claims from saml2");
+			logger.debug("getting claims from saml2");
 			claims = getClaims((org.opensaml.saml2.core.Assertion) samlToken);
 		}
 
@@ -261,7 +261,7 @@ public class SamlTokenValidator {
 
 	private static Assertion decryptAssertion(
 			EncryptedAssertion encryptedAssertion) {
-		logger.info("loading private key file");
+		logger.debug("loading private key file");
 		// Load the private key file.
 		InputStream pkis = SamlTokenValidator.class
 				.getResourceAsStream("/rsa_private_key.pk8");
@@ -273,7 +273,7 @@ public class SamlTokenValidator {
 		try {
 			byte[] encodedPrivateKey = IOUtils.toByteArray(pkis);
 			// Create the private key.
-			logger.info("encoded private key size=" + encodedPrivateKey.length);
+			logger.debug("encoded private key size=" + encodedPrivateKey.length);
 			PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
 					encodedPrivateKey);
 			RSAPrivateKey privateKey = (RSAPrivateKey) KeyFactory.getInstance(
@@ -288,11 +288,9 @@ public class SamlTokenValidator {
 					new StaticKeyInfoCredentialResolver(decryptionCredential),
 					new InlineEncryptedKeyResolver());
 
-			logger.info("decrypting using key");
+			logger.debug("decrypting using key");
 			Assertion decryptedAssertion = decrypter
 					.decrypt(encryptedAssertion);
-
-			// logger.info("decryptedAssertion=" + decryptedAssertion.);
 
 			return decryptedAssertion;
 
@@ -314,12 +312,12 @@ public class SamlTokenValidator {
 			throws ParserConfigurationException, SAXException, IOException,
 			UnmarshallingException, FederationException {
 		Document document = getDocument(rstr);
-		logger.info("response=" + rstr);
+		logger.debug("response=" + rstr);
 		Element samlTokenElement = null;
 
 		String xpath = "//*[local-name() = 'EncryptedAssertion']";
 
-		NodeList nodes = null; // TODO Null check
+		NodeList nodes = null;
 
 		try {
 			nodes = org.apache.xpath.XPathAPI.selectNodeList(document, xpath);
@@ -330,14 +328,14 @@ public class SamlTokenValidator {
 		if (nodes != null) {
 
 			if (nodes.getLength() > 0) { // Assertion is encrypted
-				logger.info("decrypting assertion");
+				logger.debug("decrypting assertion");
 				EncryptedAssertion encryptedAssertion = getEncryptedAssertion(nodes
 						.item(0));
 				Assertion decryptedAssertion = decryptAssertion(encryptedAssertion);
 				samlTokenElement = marshall(decryptedAssertion);
 
 			} else { // Check for decrypted assertion
-				logger.info("reading assertion");
+				logger.debug("reading assertion");
 				xpath = "//*[local-name() = 'Assertion']";
 				try {
 					nodes = org.apache.xpath.XPathAPI.selectNodeList(document,
@@ -361,7 +359,7 @@ public class SamlTokenValidator {
 	}
 
 	private static EncryptedAssertion getEncryptedAssertion(Node node) {
-		logger.info("unmarshalling from document");
+		logger.debug("unmarshalling from document");
 		// Unmarshall
 		UnmarshallerFactory unmarshallerFactory = Configuration
 				.getUnmarshallerFactory();
@@ -378,7 +376,7 @@ public class SamlTokenValidator {
 	}
 
 	private static Element marshall(Assertion assertion) {
-		logger.info("marshalling");
+		logger.debug("marshalling");
 		// Unmarshall
 		MarshallerFactory marshallerFactory = Configuration
 				.getMarshallerFactory();
@@ -386,7 +384,8 @@ public class SamlTokenValidator {
 		Element element;
 		try {
 			element = marshaller.marshall(assertion);
-			logAssertion(element);
+			// Uncomment to see the assertion as XML
+			// logAssertion(element);
 		} catch (MarshallingException e) {
 			throw new RuntimeException(e);
 		}
@@ -412,7 +411,7 @@ public class SamlTokenValidator {
 				.getImplementation();
 		LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
 		String string = lsSerializer.writeToString(document);
-		logger.info(string);
+		logger.debug(string);
 	}
 
 	private static String getAudienceUri(
@@ -549,8 +548,6 @@ public class SamlTokenValidator {
 			for (org.opensaml.saml2.core.Attribute attribute : attributes) {
 				String claimType = attribute.getName();
 				String claimValue = getValueFrom(attribute.getAttributeValues());
-				logger.info("claimType=" + claimType + " claimValue="
-						+ claimValue);
 				claims.add(new Claim(claimType, claimValue));
 			}
 		}

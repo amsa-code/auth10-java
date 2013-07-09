@@ -17,177 +17,177 @@ import org.slf4j.LoggerFactory;
 
 public class WSFederationFilter implements Filter {
 
-    private static final String PRINCIPAL_SESSION_VARIABLE = "FederatedPrincipal";
+	private static final String PRINCIPAL_SESSION_VARIABLE = "FederatedPrincipal";
 
-    private String loginPage;
-    private String excludedUrlsRegex;
+	private String loginPage;
+	private String excludedUrlsRegex;
 
-    final Logger logger = LoggerFactory.getLogger(WSFederationFilter.class);
+	final Logger logger = LoggerFactory.getLogger(WSFederationFilter.class);
 
-    public WSFederationFilter() {
-        logger.info("constructing");
-    }
+	public WSFederationFilter() {
+		logger.debug("constructing");
+	}
 
-    @Override
-    public void init(FilterConfig config) throws ServletException {
-        logger.info("initializing");
-        this.loginPage = config.getInitParameter("login-page-url");
-        this.excludedUrlsRegex = config.getInitParameter("exclude-urls-regex");
-    }
+	@Override
+	public void init(FilterConfig config) throws ServletException {
+		logger.debug("initializing");
+		this.loginPage = config.getInitParameter("login-page-url");
+		this.excludedUrlsRegex = config.getInitParameter("exclude-urls-regex");
+	}
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
 
-        logger.info("filtering");
+		logger.debug("filtering");
 
-        FederatedPrincipal principal = null;
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
+		FederatedPrincipal principal = null;
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // is the request is a token?
-        if (this.isSignInResponse(httpRequest)) {
-            logger.info("authenticating with token");
-            principal = this.authenticateWithToken(httpRequest, httpResponse);
-            this.writeSessionToken(httpRequest, principal);
-            this.redirectToOriginalUrl(httpRequest, httpResponse);
-        }
+		// is the request is a token?
+		if (this.isSignInResponse(httpRequest)) {
+			logger.debug("authenticating with token");
+			principal = this.authenticateWithToken(httpRequest, httpResponse);
+			this.writeSessionToken(httpRequest, principal);
+			this.redirectToOriginalUrl(httpRequest, httpResponse);
+		}
 
-        // is principal in session?
-        if (principal == null && this.sessionTokenExists(httpRequest)) {
-            logger.info("authenticating with session token");
-            principal = this.authenticateWithSessionToken(httpRequest,
-                    httpResponse);
-        }
+		// is principal in session?
+		if (principal == null && this.sessionTokenExists(httpRequest)) {
+			logger.debug("authenticating with session token");
+			principal = this.authenticateWithSessionToken(httpRequest,
+					httpResponse);
+		}
 
-        // if not authenticated at this point, redirect to login page
-        boolean excludedUrl = httpRequest.getRequestURL().toString()
-                .contains(this.loginPage)
-                || (this.excludedUrlsRegex != null
-                        && !this.excludedUrlsRegex.isEmpty() && Pattern
-                        .compile(this.excludedUrlsRegex)
-                        .matcher(httpRequest.getRequestURL().toString()).find());
+		// if not authenticated at this point, redirect to login page
+		boolean excludedUrl = httpRequest.getRequestURL().toString()
+				.contains(this.loginPage)
+				|| (this.excludedUrlsRegex != null
+						&& !this.excludedUrlsRegex.isEmpty() && Pattern
+						.compile(this.excludedUrlsRegex)
+						.matcher(httpRequest.getRequestURL().toString()).find());
 
-        if (!excludedUrl && principal == null) {
-            if (!FederatedConfiguration.getInstance().getEnableManualRedirect()) {
-                logger.info("redirecting to identity provider");
-                this.redirectToIdentityProvider(httpRequest, httpResponse);
-            } else {
-                logger.info("redirecting to login page");
-                this.redirectToLoginPage(httpRequest, httpResponse);
-            }
+		if (!excludedUrl && principal == null) {
+			if (!FederatedConfiguration.getInstance().getEnableManualRedirect()) {
+				logger.debug("redirecting to identity provider");
+				this.redirectToIdentityProvider(httpRequest, httpResponse);
+			} else {
+				logger.debug("redirecting to login page");
+				this.redirectToLoginPage(httpRequest, httpResponse);
+			}
 
-            return;
-        }
+			return;
+		}
 
-        logger.info("principal=" + principal);
-        chain.doFilter(new FederatedHttpServletRequest(httpRequest, principal),
-                response);
-    }
+		logger.debug("principal=" + principal);
+		chain.doFilter(new FederatedHttpServletRequest(httpRequest, principal),
+				response);
+	}
 
-    protected void redirectToLoginPage(HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
-        String encodedReturnUrl = URLUTF8Encoder
-                .encode(getRequestPathAndQuery(httpRequest));
-        String redirect = this.loginPage + "?returnUrl=" + encodedReturnUrl;
-        httpResponse.setHeader("Location", redirect);
-        httpResponse.setStatus(302);
-    }
+	protected void redirectToLoginPage(HttpServletRequest httpRequest,
+			HttpServletResponse httpResponse) {
+		String encodedReturnUrl = URLUTF8Encoder
+				.encode(getRequestPathAndQuery(httpRequest));
+		String redirect = this.loginPage + "?returnUrl=" + encodedReturnUrl;
+		httpResponse.setHeader("Location", redirect);
+		httpResponse.setStatus(302);
+	}
 
-    protected void redirectToIdentityProvider(HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
-        String wctx = getRequestPathAndQuery(httpRequest);
-        String redirect = FederatedLoginManager.getFederatedLoginUrl(wctx);
+	protected void redirectToIdentityProvider(HttpServletRequest httpRequest,
+			HttpServletResponse httpResponse) {
+		String wctx = getRequestPathAndQuery(httpRequest);
+		String redirect = FederatedLoginManager.getFederatedLoginUrl(wctx);
 
-        httpResponse.setHeader("Location", redirect);
-        httpResponse.setStatus(302);
-    }
+		httpResponse.setHeader("Location", redirect);
+		httpResponse.setStatus(302);
+	}
 
-    protected void redirectToOriginalUrl(HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
-        String wctx = httpRequest.getParameter("wctx");
-        if (wctx != null) {
-            httpResponse.setHeader("Location", wctx);
-            httpResponse.setStatus(302);
-        }
-    }
+	protected void redirectToOriginalUrl(HttpServletRequest httpRequest,
+			HttpServletResponse httpResponse) {
+		String wctx = httpRequest.getParameter("wctx");
+		if (wctx != null) {
+			httpResponse.setHeader("Location", wctx);
+			httpResponse.setStatus(302);
+		}
+	}
 
-    protected Boolean isSignInResponse(HttpServletRequest request) {
-        if (request.getMethod().equals("POST")
-                && request.getParameter("wa").equals("wsignin1.0")
-                && request.getParameter("wresult") != null) {
-            return true;
-        }
+	protected Boolean isSignInResponse(HttpServletRequest request) {
+		if (request.getMethod().equals("POST")
+				&& request.getParameter("wa").equals("wsignin1.0")
+				&& request.getParameter("wresult") != null) {
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    protected Boolean sessionTokenExists(HttpServletRequest request) {
-        // this could use signed cookies instead of sessions
-        return request.getSession().getAttribute(PRINCIPAL_SESSION_VARIABLE) != null;
-    }
+	protected Boolean sessionTokenExists(HttpServletRequest request) {
+		// this could use signed cookies instead of sessions
+		return request.getSession().getAttribute(PRINCIPAL_SESSION_VARIABLE) != null;
+	}
 
-    protected FederatedPrincipal authenticateWithSessionToken(
-            HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        return (FederatedPrincipal) request.getSession().getAttribute(
-                PRINCIPAL_SESSION_VARIABLE);
-    }
+	protected FederatedPrincipal authenticateWithSessionToken(
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+		return (FederatedPrincipal) request.getSession().getAttribute(
+				PRINCIPAL_SESSION_VARIABLE);
+	}
 
-    protected void writeSessionToken(HttpServletRequest request,
-            FederatedPrincipal principal) throws IOException {
-        request.getSession()
-                .setAttribute(PRINCIPAL_SESSION_VARIABLE, principal);
-    }
+	protected void writeSessionToken(HttpServletRequest request,
+			FederatedPrincipal principal) throws IOException {
+		request.getSession()
+				.setAttribute(PRINCIPAL_SESSION_VARIABLE, principal);
+	}
 
-    protected FederatedPrincipal authenticateWithToken(
-            HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        String token = request.getParameter("wresult").toString();
+	protected FederatedPrincipal authenticateWithToken(
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+		String token = request.getParameter("wresult").toString();
 
-        if (token == null) {
-            sendError(request, response, 400,
-                    "You were supposed to send a wresult parameter with a token");
-        }
+		if (token == null) {
+			sendError(request, response, 400,
+					"You were supposed to send a wresult parameter with a token");
+		}
 
-        FederatedLoginManager loginManager = FederatedLoginManager.fromRequest(
-                request, null);
+		FederatedLoginManager loginManager = FederatedLoginManager.fromRequest(
+				request, null);
 
-        try {
-            FederatedPrincipal principal = loginManager.authenticate(token,
-                    response);
-            return principal;
-        } catch (FederationException e) {
-            logger.error(e.getMessage(), e);
-            sendError(request, response, 500,
-                    "Oops an error occurred validating the token.");
-        }
+		try {
+			FederatedPrincipal principal = loginManager.authenticate(token,
+					response);
+			return principal;
+		} catch (FederationException e) {
+			logger.error(e.getMessage(), e);
+			sendError(request, response, 500,
+					"Oops an error occurred validating the token.");
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private void sendError(HttpServletRequest request,
-            HttpServletResponse response, int errorNum, String message)
-            throws IOException {
-        // create the session to avoid IllegalStateException: Cannot create
-        // a session after the response has been committed.
-        request.getSession();
-        logger.warn("response " + errorNum + ": " + message);
-        response.sendError(errorNum, message);
-    }
+	private void sendError(HttpServletRequest request,
+			HttpServletResponse response, int errorNum, String message)
+			throws IOException {
+		// create the session to avoid IllegalStateException: Cannot create
+		// a session after the response has been committed.
+		request.getSession();
+		logger.warn("response " + errorNum + ": " + message);
+		response.sendError(errorNum, message);
+	}
 
-    @Override
-    public void destroy() {
-    }
+	@Override
+	public void destroy() {
+	}
 
-    private static String getRequestPathAndQuery(HttpServletRequest req) {
-        String reqUri = req.getRequestURI().toString();
-        String queryString = req.getQueryString();
-        if (queryString != null) {
-            reqUri += "?" + queryString;
-        }
+	private static String getRequestPathAndQuery(HttpServletRequest req) {
+		String reqUri = req.getRequestURI().toString();
+		String queryString = req.getQueryString();
+		if (queryString != null) {
+			reqUri += "?" + queryString;
+		}
 
-        return reqUri;
-    }
+		return reqUri;
+	}
 }
