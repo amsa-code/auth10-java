@@ -24,7 +24,13 @@ Included in this repo is a sample webapp called 'wsf-sample'. To use this webapp
 Deploy the war to your SSL enabled container and visit the root URL for the webapp.
 
 ## How it works
-The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after the base url of the webapp (/wsf-sample/*) will apply `WSFederationFilter.java` filter. This filter checks if the session is valid and if it's not valid it will redirect to the Identity Provider's authentication url. Once authenticated it returns back to the specified return url in `federation.properties`. The response that comes back will contain the claims under the **Assertion** element node in the SAML xml. If using SAML2 **and encryption** you'll find the claims under the **EncryptedAssertion** (see below). The filter validates the response and puts the user principal and claims in the session object. The filter then forwards to the original requested url.
+The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after the base url of the webapp (/wsf-sample/*) will apply `WSFederationFilter.java` filter. This filter 
+* checks if the session is valid 
+* if session not valid it redirects to the Identity Provider's authentication url. 
+* once authenticated the IP forwards to the specified return url in `federation.properties` as an http POST with the SAML xml.
+* the SAML xml contains the claims under the *Assertion* element node. If using SAML2 *and encrypted assertions* you'll find the claims under the *EncryptedAssertion* node (see below). 
+* the filter validates and decrypts the SAML xml and puts the user principal and claims in the session object. 
+* the filter then forwards to the original requested url.
 
 Note that the servlet mapped to the uri specified as the audience uri in `federation.properties` (`federation.audienceuris`) must implement `doPost()` as well as `doGet()` for the filter to work correctly.
 
