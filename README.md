@@ -32,7 +32,7 @@ Included in this repo is a sample webapp called 'wsf-sample'. To use this webapp
 * `/src/main/resources/rsa_private_key.pk8` (only required if using SAML2 encrypted assertions)
 
 ## How it works
-The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after the base url of the webapp (/wsf-sample/*) will apply `WSFederationFilter.java` filter. This filter checks if the session is valid and if it's not valid it will redirect to the Identity Provider's authentication url. Once authenticated it returns back to the specified return url in `federation.properties`. The response that comes back will contain the claims under the '''Assertion''' element node in the SAML xml. If using SAML2 '''and encryption''' you'll find the claims under the '''EncryptedAssertion'''. This of course leads onto the next topic....
+The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after the base url of the webapp (/wsf-sample/*) will apply `WSFederationFilter.java` filter. This filter checks if the session is valid and if it's not valid it will redirect to the Identity Provider's authentication url. Once authenticated it returns back to the specified return url in `federation.properties`. The response that comes back will contain the claims under the **Assertion** element node in the SAML xml. If using SAML2 **and encryption** you'll find the claims under the **EncryptedAssertion**. This of course leads onto the next topic....
 
 
 ## Decrypting Assertions
