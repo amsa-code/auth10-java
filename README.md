@@ -42,6 +42,7 @@ If your Identity Provider(IP) uses SAML version 2 with encrypted assertions you 
 * install Java Cryptographic Extensions (JCE) for your JRE
 
 JCE for Java 7 can be found here : http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+
 Follow the readme found in the JCE zip.
 
 If you generated your public/private key as a Java keystore (*.jks) then you can do the following to extract the private key.
