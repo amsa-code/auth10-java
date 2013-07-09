@@ -37,9 +37,9 @@ The `/src/main/webapp/WEB-INF/web.xml` is configured so visiting anything after 
 
 ## Decrypting Assertions
 
-If your Identity Provider(IP) uses SAML version 2 with encrypted assertions you will need to 
-*replace the private key `/src/main/resources/rsa_private_key.pk8` in the wsf-sample project.
-*install Java Cryptographic Extensions (JCE) for your JRE
+If your Identity Provider(IP) uses SAML version 2 with encrypted assertions you will need to :
+* replace the private key `/src/main/resources/rsa_private_key.pk8` in the wsf-sample project.
+* install Java Cryptographic Extensions (JCE) for your JRE
 
 JCE for Java 7 can be found here : http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
 Follow the readme found in the JCE zip.
