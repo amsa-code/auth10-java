@@ -66,6 +66,7 @@ public class FederatedLoginManager {
 			HttpServletResponse response) throws FederationException {
 		List<Claim> claims = null;
 
+		boolean finishedNormally = false;
 		try {
 			SamlTokenValidator validator = new SamlTokenValidator();
 
@@ -82,18 +83,19 @@ public class FederatedLoginManager {
 			if (listener != null)
 				listener.OnAuthenticationSucceed(principal);
 
+			finishedNormally = true;
 			return principal;
 		} catch (FederationException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new FederationException("Federated Login failed!", e);
+		} finally {
+			if (claims == null) {
+				request.getSession().invalidate();
+				if (finishedNormally)
+					new FederationException("Invalid Token");
+			}
 		}
-		// finally {
-		// if (claims == null) {
-		// request.getSession().invalidate();
-		// throw new FederationException("Invalid Token");
-		// }
-		// }
 	}
 
 	protected void setTrustedIssuers(SamlTokenValidator validator)

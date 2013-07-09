@@ -288,11 +288,9 @@ public class SamlTokenValidator {
 					new StaticKeyInfoCredentialResolver(decryptionCredential),
 					new InlineEncryptedKeyResolver());
 
-			// Decrypt the assertion.
-			Assertion decryptedAssertion;
-
 			logger.info("decrypting using key");
-			decryptedAssertion = decrypter.decrypt(encryptedAssertion);
+			Assertion decryptedAssertion = decrypter
+					.decrypt(encryptedAssertion);
 
 			// logger.info("decryptedAssertion=" + decryptedAssertion.);
 
@@ -321,30 +319,33 @@ public class SamlTokenValidator {
 
 		String xpath = "//*[local-name() = 'EncryptedAssertion']";
 
-		NodeList nodes = null;
+		NodeList nodes = null; // TODO Null check
 
 		try {
 			nodes = org.apache.xpath.XPathAPI.selectNodeList(document, xpath);
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage(), e);
 		}
 
-		if (nodes.getLength() > 0) { // Assertion is encrypted
-			logger.info("decrypting assertion");
-			EncryptedAssertion encryptedAssertion = getEncryptedAssertion(nodes
-					.item(0));
-			Assertion decryptedAssertion = decryptAssertion(encryptedAssertion);
-			samlTokenElement = marshall(decryptedAssertion);
+		if (nodes != null) {
 
-		} else { // Check for decrypted assertion
-			logger.info("reading assertion");
-			xpath = "//*[local-name() = 'Assertion']";
-			try {
-				nodes = org.apache.xpath.XPathAPI.selectNodeList(document,
-						xpath);
-				samlTokenElement = (Element) nodes.item(0);
-			} catch (TransformerException e) {
-				e.printStackTrace();
+			if (nodes.getLength() > 0) { // Assertion is encrypted
+				logger.info("decrypting assertion");
+				EncryptedAssertion encryptedAssertion = getEncryptedAssertion(nodes
+						.item(0));
+				Assertion decryptedAssertion = decryptAssertion(encryptedAssertion);
+				samlTokenElement = marshall(decryptedAssertion);
+
+			} else { // Check for decrypted assertion
+				logger.info("reading assertion");
+				xpath = "//*[local-name() = 'Assertion']";
+				try {
+					nodes = org.apache.xpath.XPathAPI.selectNodeList(document,
+							xpath);
+					samlTokenElement = (Element) nodes.item(0);
+				} catch (TransformerException e) {
+					logger.warn(e.getMessage(), e);
+				}
 			}
 		}
 
