@@ -1,6 +1,6 @@
 This library speaks the WS-Federation protocol and SAML 1.1 and 2.0 tokens. It interops fine with Microsoft-related products like ADFS, Windows Azure Active Directory and Windows Identity Foundation.
 
-The code is a fork of https://github.com/auth10-java/auth10-java.git but has been modified to also decrypt `EncryptedAssertion`. The original auth10-java github project is a simplified version with some improvements of the library released by Microsoft <https://github.com/WindowsAzure/azure-sdk-for-java-samples>. 
+The code is a fork of https://github.com/auth10-java/auth10-java.git that has been modified to decrypt `EncryptedAssertion`. The original auth10-java github project is a simplified version with some improvements of the library released by Microsoft <https://github.com/WindowsAzure/azure-sdk-for-java-samples>. 
 
 ## Build Instructions
 
